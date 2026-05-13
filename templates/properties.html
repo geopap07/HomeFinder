@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Properties – HomeFinder{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+
+    <!-- FILTER SIDEBAR -->
+    <div class="col-lg-3">
+      <div class="filter-card sticky-top" style="top:80px">
+        <h5 class="filter-title"><i class="fas fa-filter me-2"></i>Filter Properties</h5>
+        <form method="GET" action="{{ url_for('properties') }}" id="filter-form">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Search</label>
+            <input type="text" name="q" class="form-control"
+                   placeholder="Location, title…" value="{{ q or '' }}"/>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Property Type</label>
+            {% for t in ['residential','commercial','rental'] %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="type"
+                     value="{{ t }}" id="type_{{ t }}"
+                     {{ 'checked' if prop_type == t else '' }}
+                     onchange="document.getElementById('filter-form').submit()"/>
+              <label class="form-check-label text-capitalize" for="type_{{ t }}">{{ t }}</label>
+            </div>
+            {% endfor %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="type" value=""
+                     id="type_all" {{ 'checked' if not prop_type else '' }}
+                     onchange="document.getElementById('filter-form').submit()"/>
+              <label class="form-check-label" for="type_all">All Types</label>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Price Range (€)</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="number" name="min_price" class="form-control form-control-sm"
+                       placeholder="Min" value="{{ min_price or '' }}"/>
+              </div>
+              <div class="col-6">
+                <input type="number" name="max_price" class="form-control form-control-sm"
+                       placeholder="Max" value="{{ max_price or '' }}"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Min Bedrooms</label>
+            <select name="bedrooms" class="form-select form-select-sm">
+              <option value="">Any</option>
+              {% for n in [1,2,3,4,5] %}
+              <option value="{{ n }}" {{ 'selected' if bedrooms == n else '' }}>{{ n }}+</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 mb-2">
+            <i class="fas fa-search me-1"></i>Apply Filters
+          </button>
+          <a href="{{ url_for('properties') }}" class="btn btn-outline-secondary w-100">
+            <i class="fas fa-times me-1"></i>Clear
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">
+          {% if q or prop_type or min_price or max_price or bedrooms %}
+            <span class="text-primary">{{ properties|length }}</span> results found
+          {% else %}
+            All Properties
+          {% endif %}
+        </h4>
+        <span class="text-muted small">
+          {% if q %}<span class="badge bg-light text-dark me-1">{{ q }}</span>{% endif %}
+          {% if prop_type %}<span class="badge bg-primary me-1">{{ prop_type }}</span>{% endif %}
+        </span>
+      </div>
+
+      {% if properties %}
+      <div class="row g-4">
+        {% for prop in properties %}
+        <div class="col-md-6 col-xl-4">
+          <div class="property-card h-100">
+            <div class="property-img-wrapper">
+              <img src="{{ prop.image_url or 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600' }}"
+                   class="property-img" alt="{{ prop.title }}"
+                   onerror="this.src='https://via.placeholder.com/400x250?text=Property'"/>
+              <span class="property-type-badge badge-{{ prop.prop_type }}">
+                {{ prop.prop_type | capitalize }}
+              </span>
+              {% if session.get('user_id') %}
+              <form action="{{ url_for('add_favorite', property_id=prop.id) }}" method="POST"
+                    class="favorite-form">
+                <button type="submit" class="btn-favorite" title="Save to favorites">
+                  <i class="fas fa-heart"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            <div class="property-body">
+              <h6 class="property-title">{{ prop.title }}</h6>
+              <p class="property-location">
+                <i class="fas fa-map-marker-alt me-1"></i>{{ prop.location }}
+              </p>
+              <div class="property-specs">
+                {% if prop.bedrooms > 0 %}
+                <span><i class="fas fa-bed me-1"></i>{{ prop.bedrooms }}</span>
+                {% endif %}
+                <span><i class="fas fa-bath me-1"></i>{{ prop.bathrooms }}</span>
+                <span><i class="fas fa-ruler-combined me-1"></i>{{ prop.area_sqm }}m²</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="property-price">
+                  {% if prop.prop_type == 'rental' %}€{{ "{:,.0f}".format(prop.price) }}/mo
+                  {% else %}€{{ "{:,.0f}".format(prop.price) }}{% endif %}
+                </span>
+                <a href="{{ url_for('property_detail', property_id=prop.id) }}"
+                   class="btn btn-sm btn-primary">View →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No properties found</h5>
+        <p class="text-muted">Try adjusting your search filters</p>
+        <a href="{{ url_for('properties') }}" class="btn btn-outline-primary">Clear Filters</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

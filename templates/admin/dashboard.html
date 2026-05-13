@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard – HomeFinder{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-2 mb-4">
+      <div class="admin-sidebar">
+        <h6 class="sidebar-title">Admin Panel</h6>
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_properties') }}"><i class="fas fa-building me-2"></i>Properties</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_inquiries') }}"><i class="fas fa-envelope me-2"></i>Inquiries</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_users') }}"><i class="fas fa-users me-2"></i>Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_reports') }}"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-10">
+      <h3 class="fw-bold mb-4">Dashboard Overview</h3>
+
+      <!-- Stats Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="admin-stat-card bg-primary text-white">
+            <div class="admin-stat-num">{{ total_properties }}</div>
+            <div class="admin-stat-label">Total Properties</div>
+            <i class="fas fa-building admin-stat-icon"></i>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="admin-stat-card bg-success text-white">
+            <div class="admin-stat-num">{{ total_users }}</div>
+            <div class="admin-stat-label">Registered Users</div>
+            <i class="fas fa-users admin-stat-icon"></i>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="admin-stat-card bg-warning text-white">
+            <div class="admin-stat-num">{{ total_inquiries }}</div>
+            <div class="admin-stat-label">Total Inquiries</div>
+            <i class="fas fa-envelope admin-stat-icon"></i>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="admin-stat-card bg-danger text-white">
+            <div class="admin-stat-num">{{ pending_inquiries }}</div>
+            <div class="admin-stat-label">Pending Inquiries</div>
+            <i class="fas fa-clock admin-stat-icon"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Recent Inquiries -->
+        <div class="col-lg-7">
+          <div class="admin-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold mb-0">Recent Inquiries</h6>
+              <a href="{{ url_for('admin_inquiries') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-light">
+                  <tr><th>User</th><th>Property</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                  {% for inq in recent_inquiries %}
+                  <tr>
+                    <td>{{ inq.user.name }}</td>
+                    <td class="text-truncate" style="max-width:150px">{{ inq.property.title }}</td>
+                    <td><span class="badge bg-{{ 'success' if inq.status == 'resolved' else 'warning' }}">{{ inq.status }}</span></td>
+                    <td class="text-muted small">{{ inq.created_at.strftime('%d %b') }}</td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="4" class="text-muted text-center">No inquiries yet</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="col-lg-5">
+          <div class="admin-card">
+            <h6 class="fw-bold mb-3">Recent Activity Log</h6>
+            <div class="activity-log">
+              {% for log in recent_logs %}
+              <div class="log-item">
+                <small class="text-muted">{{ log.timestamp.strftime('%H:%M') }}</small>
+                <span class="ms-2">{{ log.action }}</span>
+              </div>
+              {% else %}
+              <p class="text-muted small">No activity yet</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-4">
+        <h6 class="fw-bold mb-3">Quick Actions</h6>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('admin_add_property') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Property
+          </a>
+          <a href="{{ url_for('admin_inquiries') }}" class="btn btn-outline-warning">
+            <i class="fas fa-envelope me-2"></i>Manage Inquiries
+          </a>
+          <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-info">
+            <i class="fas fa-chart-bar me-2"></i>View Reports
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

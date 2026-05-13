@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ property.title }} – HomeFinder{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('properties') }}">Properties</a></li>
+      <li class="breadcrumb-item active">{{ property.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-5">
+    <!-- LEFT: Image + Details -->
+    <div class="col-lg-7">
+      <div class="detail-img-wrapper mb-4">
+        <img src="{{ property.image_url or 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800' }}"
+             class="img-fluid rounded-3 shadow" alt="{{ property.title }}"
+             onerror="this.src='https://via.placeholder.com/800x500?text=Property'"/>
+        <span class="property-type-badge badge-{{ property.prop_type }} detail-badge">
+          {{ property.prop_type | capitalize }}
+        </span>
+      </div>
+      <h1 class="fw-bold mb-1">{{ property.title }}</h1>
+      <p class="text-muted mb-2">
+        <i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ property.location }}
+      </p>
+      <div class="specs-bar mb-4">
+        {% if property.bedrooms > 0 %}
+        <div class="spec-item"><i class="fas fa-bed"></i><span>{{ property.bedrooms }} Bedrooms</span></div>
+        {% endif %}
+        <div class="spec-item"><i class="fas fa-bath"></i><span>{{ property.bathrooms }} Bathrooms</span></div>
+        <div class="spec-item"><i class="fas fa-ruler-combined"></i><span>{{ property.area_sqm }} m²</span></div>
+        <div class="spec-item">
+          <i class="fas fa-circle {{ 'text-success' if property.is_available else 'text-danger' }}"></i>
+          <span>{{ 'Available' if property.is_available else 'Unavailable' }}</span>
+        </div>
+      </div>
+      <h5 class="fw-bold mb-2">Description</h5>
+      <p class="text-muted">{{ property.description or 'No description provided.' }}</p>
+    </div>
+
+    <!-- RIGHT: Price + Actions + Inquiry -->
+    <div class="col-lg-5">
+      <div class="action-card mb-4">
+        <div class="price-display mb-3">
+          {% if property.prop_type == 'rental' %}
+            <span class="price-main">€{{ "{:,.0f}".format(property.price) }}</span>
+            <span class="price-period">/month</span>
+          {% else %}
+            <span class="price-main">€{{ "{:,.0f}".format(property.price) }}</span>
+          {% endif %}
+        </div>
+
+        {% if session.get('user_id') %}
+          <!-- Favorite button -->
+          <form action="{{ url_for('add_favorite', property_id=property.id) }}" method="POST" class="mb-2">
+            <button type="submit" class="btn btn-outline-danger w-100 py-2">
+              <i class="fas fa-heart me-2"></i>
+              {{ 'Saved to Favorites ✓' if is_favorite else 'Save to Favorites' }}
+            </button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline-primary w-100 mb-2 py-2">
+            <i class="fas fa-sign-in-alt me-2"></i>Login to Save
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- INQUIRY FORM (FR-6) -->
+      {% if session.get('user_id') %}
+      <div class="inquiry-card">
+        <h5 class="fw-bold mb-3"><i class="fas fa-envelope me-2 text-primary"></i>Submit Inquiry</h5>
+        <form action="{{ url_for('submit_inquiry', property_id=property.id) }}" method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Your Message</label>
+            <textarea name="message" class="form-control" rows="4"
+                      placeholder="I am interested in this property and would like to arrange a viewing…"
+                      required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+            <i class="fas fa-paper-plane me-2"></i>Send Inquiry
+          </button>
+          <p class="text-muted small mt-2 text-center">
+            <i class="fas fa-check-circle text-success me-1"></i>Confirmation email sent automatically
+          </p>
+        </form>
+      </div>
+      {% else %}
+      <div class="inquiry-card text-center py-4">
+        <i class="fas fa-lock fa-2x text-muted mb-3"></i>
+        <p class="text-muted">Please log in to submit an inquiry</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+          <i class="fas fa-sign-in-alt me-2"></i>Login
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

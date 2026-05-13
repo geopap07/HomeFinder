@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{% if property %}Edit{% else %}Add{% endif %} Property – HomeFinder{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h3 class="fw-bold mb-4">
+        <i class="fas fa-{{ 'edit' if property else 'plus' }} me-2"></i>
+        {{ 'Edit' if property else 'Add New' }} Property
+      </h3>
+      <div class="admin-card">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Title *</label>
+              <input type="text" name="title" class="form-control"
+                     value="{{ property.title if property else '' }}" required/>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Location *</label>
+              <input type="text" name="location" class="form-control"
+                     value="{{ property.location if property else '' }}" required/>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Property Type *</label>
+              <select name="prop_type" class="form-select" required>
+                {% for t in ['residential','commercial','rental'] %}
+                <option value="{{ t }}" {{ 'selected' if property and property.prop_type == t else '' }}>
+                  {{ t | capitalize }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Price (€) *</label>
+              <input type="number" name="price" class="form-control" step="0.01"
+                     value="{{ property.price if property else '' }}" required/>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Bedrooms</label>
+              <input type="number" name="bedrooms" class="form-control" min="0" max="20"
+                     value="{{ property.bedrooms if property else '0' }}"/>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Bathrooms</label>
+              <input type="number" name="bathrooms" class="form-control" min="1" max="20"
+                     value="{{ property.bathrooms if property else '1' }}"/>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Area (m²)</label>
+              <input type="number" name="area_sqm" class="form-control" min="1"
+                     value="{{ property.area_sqm if property else '50' }}"/>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Description</label>
+              <textarea name="description" class="form-control" rows="4">{{ property.description if property else '' }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Image URL</label>
+              <input type="text" name="image_url" class="form-control"
+                     value="{{ property.image_url if property else '' }}"
+                     placeholder="https://images.unsplash.com/..."/>
+            </div>
+            {% if property %}
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_available"
+                       id="is_available" {{ 'checked' if property.is_available else '' }}/>
+                <label class="form-check-label" for="is_available">Available</label>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="fas fa-save me-2"></i>{{ 'Update' if property else 'Add Property' }}
+            </button>
+            <a href="{{ url_for('admin_properties') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
