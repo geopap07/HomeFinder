@@ -20,7 +20,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# ─── MODELS ──────────────────────────────────────────────────────────────────
 
 class User(db.Model):
     """User model - RegisteredUser, Administrator, Supervisor"""
@@ -96,7 +95,7 @@ class Notification(db.Model):
     sent_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
+
 
 def log_activity(action, user_id=None):
     """Log user activity (NFR-4)"""
@@ -137,7 +136,7 @@ def admin_required(f):
     return decorated
 
 
-# ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
+
 
 @app.route('/')
 def index():
@@ -261,7 +260,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-# ─── PROPERTY ROUTES ─────────────────────────────────────────────────────────
+
 
 @app.route('/properties')
 def properties():
@@ -407,7 +406,6 @@ def notifications():
     return render_template('notifications.html', notifications=notifs)
 
 
-# ─── ADMIN ROUTES ─────────────────────────────────────────────────────────────
 
 @app.route('/admin')
 @admin_required
@@ -574,7 +572,6 @@ def admin_users():
     return render_template('admin/users.html', users=users)
 
 
-# ─── API ENDPOINTS ────────────────────────────────────────────────────────────
 
 @app.route('/api/notifications/count')
 @login_required
@@ -587,7 +584,7 @@ def notification_count():
     return jsonify({'count': count})
 
 
-# ─── DATABASE SEED ────────────────────────────────────────────────────────────
+
 
 def seed_database():
     """Seed database with sample data"""
@@ -616,7 +613,6 @@ def seed_database():
     db.session.add_all([admin, supervisor, test_user])
     db.session.commit()
 
-    # Sample properties
     images = [
         'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
         'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800',
@@ -655,11 +651,12 @@ def seed_database():
         db.session.add(p)
 
     db.session.commit()
-    print("✅ Database seeded successfully!")
+    print("Database seeded successfully!")
 
+
+with app.app_context():
+    db.create_all()
+    seed_database()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        seed_database()
-    app.run(debug=True, port=5000)
+    app.run(debug=False)
