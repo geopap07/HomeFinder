@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}My Favorites – HomeFinder{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="fas fa-heart me-2 text-danger"></i>My Saved Properties</h2>
+  {% if favorites %}
+  <div class="row g-4">
+    {% for fav in favorites %}
+    <div class="col-md-6 col-lg-4">
+      <div class="property-card h-100">
+        <div class="property-img-wrapper">
+          <img src="{{ fav.property.image_url or 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600' }}"
+               class="property-img" alt="{{ fav.property.title }}"
+               onerror="this.src='https://via.placeholder.com/400x250?text=Property'"/>
+          <span class="property-type-badge badge-{{ fav.property.prop_type }}">
+            {{ fav.property.prop_type | capitalize }}
+          </span>
+        </div>
+        <div class="property-body">
+          <h6 class="property-title">{{ fav.property.title }}</h6>
+          <p class="property-location"><i class="fas fa-map-marker-alt me-1"></i>{{ fav.property.location }}</p>
+          <p class="property-price">
+            {% if fav.property.prop_type == 'rental' %}€{{ "{:,.0f}".format(fav.property.price) }}/mo
+            {% else %}€{{ "{:,.0f}".format(fav.property.price) }}{% endif %}
+          </p>
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('property_detail', property_id=fav.property.id) }}" class="btn btn-sm btn-primary flex-grow-1">View</a>
+            <form action="{{ url_for('remove_favorite', property_id=fav.property.id) }}" method="POST">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+    <h5 class="text-muted">No saved properties yet</h5>
+    <a href="{{ url_for('properties') }}" class="btn btn-primary mt-2">Browse Properties</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

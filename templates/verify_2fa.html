@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Verify 2FA – HomeFinder{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="auth-card text-center">
+        <div class="auth-header mb-4">
+          <div class="twofa-icon mb-3">
+            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+          </div>
+          <h3 class="fw-bold">Two-Factor Authentication</h3>
+          <p class="text-muted">A 6-digit token has been sent to your email address. It expires in <strong>30 seconds</strong>.</p>
+        </div>
+        <div class="countdown-bar mb-4">
+          <div class="countdown-fill" id="countdown-fill"></div>
+        </div>
+        <p class="timer-text mb-4">Token expires in: <span id="timer" class="fw-bold text-primary">30</span>s</p>
+        <form method="POST">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Enter Token</label>
+            <input type="text" name="token" class="form-control form-control-lg text-center token-input"
+                   maxlength="6" placeholder="000000" autocomplete="off" required autofocus/>
+            <div class="form-text">6-digit code from your email (shown in the flash message above for demo)</div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+            <i class="fas fa-check-circle me-2"></i>Verify Token
+          </button>
+        </form>
+        <p class="mt-3 text-muted small">
+          <a href="{{ url_for('login') }}" class="text-secondary">← Back to Login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  let timeLeft = 30;
+  const timerEl = document.getElementById('timer');
+  const fillEl  = document.getElementById('countdown-fill');
+  const interval = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if (fillEl) fillEl.style.width = (timeLeft / 30 * 100) + '%';
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      timerEl.textContent = '0';
+      timerEl.classList.add('text-danger');
+    }
+  }, 1000);
+</script>
+{% endblock %}
